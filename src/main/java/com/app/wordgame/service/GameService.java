@@ -3,6 +3,7 @@ package com.app.wordgame.service;
 import com.app.wordgame.entity.Card;
 import com.app.wordgame.entity.CardType;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 

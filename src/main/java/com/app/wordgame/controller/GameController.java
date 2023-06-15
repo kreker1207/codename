@@ -4,21 +4,24 @@ import com.app.wordgame.entity.Card;
 import com.app.wordgame.service.GameService;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.stereotype.Controller;
+
 
 import java.util.List;
 
-@RestController
+@Controller
 @RequiredArgsConstructor
 public class GameController {
     private final GameService gameService;
 
-    @GetMapping("/cards")
-    @ResponseStatus(HttpStatus.OK)
+    @MessageMapping("/cards")
+    @SendTo("/topic/greetings")
     public List<Card> generateCards(){
+        System.out.println("Client connected /////////////////");
         return gameService.generateCards(5);
     }
+
 }
