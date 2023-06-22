@@ -3,6 +3,7 @@ package com.app.wordgame.service;
 import com.app.wordgame.entity.Card;
 import com.app.wordgame.entity.CardType;
 
+import com.app.wordgame.entity.Room;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,5 +66,13 @@ public class GameService {
             cardTypes.add(cardType);
         }
         return cardTypes;
+    }
+
+    public String createRoom() {
+        Room room = new Room();
+        UUID uuid = UUID.randomUUID();
+        String id = uuid.toString();
+        room.setId(id.substring(1,8));
+        return room.getId();
     }
 }
