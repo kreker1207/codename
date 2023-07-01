@@ -16,8 +16,8 @@ import java.util.List;
 public class GameController {
     private final GameService gameService;
 
-    @MessageMapping("/cards")
-    @SendTo("/topic/greetings")
+    @MessageMapping("/cards/{roomId}")
+    @SendTo("/topic/greetings/{roomId}")
     public List<Card> generateCards(){
         System.out.println("Client connected /////////////////");
         return gameService.generateCards(5);

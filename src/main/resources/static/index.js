@@ -1,31 +1,46 @@
 window.onload = async function () {
-    let cookie = document.cookie
-    console.log(cookie)
     let roomIdCookie = getCookieValue('roomId');
-    let usernameCookie = getCookieValue('username')
+    let usernameCookie = getCookieValue('username');
+    let urlRoomId = getRoomIdFromUrl();
+
+    if (urlRoomId) {
+        roomIdCookie = urlRoomId;
+        document.cookie = "roomId=" + roomIdCookie;
+    }
+
     if (usernameCookie === "" || roomIdCookie === "") {
         let person = prompt("Please enter your username:", "user");
         if (person == null || person === "") {
-            document.cookie = "username=user";
-            await handleRoom();
+            let randomName = (Math.random() + 1).toString(36).substring(7);
+            document.cookie = "username=user-" + randomName;
         } else {
             document.cookie = "username=" + person;
-            await handleRoom();
         }
+        await handleRoom();
     }
-    connect();
+    let roomId = getCookieValue('roomId');
+
+    window.history.pushState({}, document.title, "?roomId=" + roomId);
+
+    connect(roomId);
 };
+
 let stompClient = null;
 
-function connect() {
+function connect(roomId) {
     const socket = new SockJS('/websocket');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function () {
-        stompClient.subscribe('/topic/greetings', function (generateCards) {
+        stompClient.subscribe('/topic/team/' + roomId, function (teamUpdate) {
+            const room = JSON.parse(teamUpdate.body);
+            updateUI(room);
+        });
+        stompClient.subscribe('/topic/greetings/' + roomId, function (generateCards) {
             wordShuffle(JSON.parse(generateCards.body));
         });
     });
 }
+
 function wordShuffle(response) {
     const field = document.getElementById("word-field");
     field.innerHTML = '';
@@ -45,14 +60,16 @@ function wordShuffle(response) {
     cardNum('blue', blue);
 }
 
-function cardNum(type, num){
+function cardNum(type, num) {
     console.log(type + " " + num)
-    const side = document.getElementById("n"+type)
-    side.innerText='';
+    const side = document.getElementById("n" + type)
+    side.innerText = '';
     side.innerText = num
 }
+
 function generateCards() {
-    stompClient.send('/app/cards', {}, '');
+    let urlRoomId = getRoomIdFromUrl();
+    stompClient.send('/app/cards/' + urlRoomId, {}, '');
 }
 
 function createRoom() {
@@ -85,3 +102,43 @@ function getCookieValue(name) {
     }
     return "";
 }
+
+function getRoomIdFromUrl() {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    return urlParams.get("roomId");
+}
+
+function userToTeamGenerator(team, master, roomId) {
+    let usernameCookie = getCookieValue('username');
+    const user = {
+        username: usernameCookie,
+        master: master
+    };
+    const request = {
+        user: user,
+        teamColor: team.color
+    };
+    addUserToTeam(request, roomId, updateUI);
+}
+
+function addUserToTeam(request, roomId, callback) {
+    fetch('/team/' + roomId, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(request)
+    })
+        .then(response => response.json())
+        .then(room => {
+            console.log(room);
+            callback(room);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+function updateUI(room) {
+   }
