@@ -4,6 +4,7 @@ import com.app.wordgame.entity.DTO.EnterTeamData;
 import com.app.wordgame.entity.Room;
 import com.app.wordgame.service.RoomService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
@@ -21,10 +22,14 @@ public class RoomController {
     public String createRoom(){
         return roomService.createRoom();
     }
-    @MessageMapping("/team/{roomId}")
+//    @MessageMapping("/team/{roomId}")
+//    @SendTo("/topic/team/{roomId}")
+//    public Room enterTeam(@RequestBody EnterTeamData enterTeamData){
+//       return roomService.enterTeam(enterTeamData);
+//    }
+    @MessageMapping("/team/{roomId}/join")
     @SendTo("/topic/team/{roomId}")
-    public Room enterTeam(@RequestBody EnterTeamData enterTeamData){
-       return roomService.enterTeam(enterTeamData);
+    public Room joinTeam(@DestinationVariable String roomId, @RequestBody EnterTeamData enterTeamData) {
+        return roomService.enterTeam(enterTeamData);
     }
-
 }

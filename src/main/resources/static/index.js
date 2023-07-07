@@ -109,36 +109,51 @@ function getRoomIdFromUrl() {
     return urlParams.get("roomId");
 }
 
-function userToTeamGenerator(team, master, roomId) {
+function userToTeamGenerator(team, master) {
     let usernameCookie = getCookieValue('username');
     const user = {
-        username: usernameCookie,
+        name: usernameCookie,
         master: master
     };
     const request = {
         user: user,
-        teamColor: team.color
+        teamColor: team
     };
-    addUserToTeam(request, roomId, updateUI);
+    addUserToTeam(request, getRoomIdFromUrl(), updateUI);
+
 }
 
 function addUserToTeam(request, roomId, callback) {
-    fetch('/team/' + roomId, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(request)
-    })
-        .then(response => response.json())
-        .then(room => {
-            console.log(room);
-            callback(room);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+    stompClient.send(`/app/team/${roomId}/join`, {}, JSON.stringify(request));
 }
 
 function updateUI(room) {
-   }
+    const teams = Object.values(room.teamMap);
+
+    teams.forEach(team => {
+        const teamColor = team.color;
+        const members = team.members;
+        console.log(members)
+
+        const isMaster = members && members.some(member => member.master);
+
+        const prefix = isMaster ? "m" : "n";
+        const teamElementId = prefix + teamColor + "Team";
+
+        const membersElement = document.getElementById(teamElementId);
+        if (members && Array.isArray(members)) {
+            members.forEach(member => {
+                const memberElement = document.createElement("div");
+                memberElement.className = "joiner"
+                memberElement.innerText = member.name;
+                membersElement.appendChild(memberElement);
+            });
+        }
+    });
+}
+function createJoinerDiv(joinUser, usernameCookie){
+    const joiner = document.createElement('div');
+    joiner.className = 'joiner';
+    joiner.innerText = usernameCookie;
+    joinUser.appendChild(joiner);
+}

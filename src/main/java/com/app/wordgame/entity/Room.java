@@ -1,9 +1,11 @@
 package com.app.wordgame.entity;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,15 +14,16 @@ import java.util.Map;
 @NoArgsConstructor
 @Getter
 @Setter
+@Component
 public class Room {
-    public String id;
-    public Map<String,Team> teamMap;
+    private String id;
+    private Map<String,Team> teamMap;
 
     public Room(String id) {
         this.id = id;
         this.teamMap = createTeamsMap();
     }
-    private Map<String,Team> createTeamsMap(){
+    private Map<String, Team> createTeamsMap() {
         Team orangeTeam = new Team("Orange",null);
         Team blueTeam = new Team("Blue",null);
         Team spectator = new Team("spectator",null);

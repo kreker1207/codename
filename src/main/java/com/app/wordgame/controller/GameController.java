@@ -19,7 +19,6 @@ public class GameController {
     @MessageMapping("/cards/{roomId}")
     @SendTo("/topic/greetings/{roomId}")
     public List<Card> generateCards(){
-        System.out.println("Client connected /////////////////");
         return gameService.generateCards(5);
     }
 
